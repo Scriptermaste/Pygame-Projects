@@ -8,6 +8,8 @@ black = (0, 0, 0)
 red = (255, 0, 0)
 cyan = (0, 255, 255)
 green = (0, 255, 0)
+white = (255, 255, 255)
+blue = (0, 0, 255)
 
 screen = pygame.display.set_mode((width, height))
 pygame.display.set_caption("Steal The Diamond")
@@ -39,13 +41,31 @@ class Player(pygame.sprite.Sprite):
             self.playerspeed = 5
         if not keys[pygame.K_LSHIFT]:
             self.playerspeed = 3
+    
+        for wall in walls:
+            if self.rect.colliderect(wall.rect):
+                if self.rect.y > 0:
+                    self.rect.bottom = wall.rect.top
             
+                    self.rect.y = 0
+                    self.not_jumping = True
+                elif self.rect.y < 0:
+                    self.rect.top = wall.rect.bottom
+                    self.rect.y = 0
+        
+
 class Diamond(pygame.sprite.Sprite):
     def __init__(self, x, y, diamond_width, diamond_height, color):
         super().__init__()
         self.image = pygame.Surface((diamond_width, diamond_height))
         self.image.fill(color)
         self.rect = self.image.get_rect(bottomleft=(x, y))  
+class Wall(pygame.sprite.Sprite):
+    def __init__(self, x, y, wall_width, wall_height, color):
+        super().__init__()
+        self.image = pygame.Surface((wall_width, wall_height))
+        self.image.fill(color)
+        self.rect = self.image.get_rect(bottomleft=(x, y))
 
 class Exit_Door(pygame.sprite.Sprite):
     def __init__(self, x, y, door_width, door_height, color):
@@ -54,8 +74,53 @@ class Exit_Door(pygame.sprite.Sprite):
         self.image.fill(color)
         self.rect = self.image.get_rect(bottomleft=(x, y)) 
 
+class Guard(pygame.sprite.Sprite):
+    def __init__(self,  guard_width, guard_height, color, waypoints, speed):
+        super().__init__()
+        self.image = pygame.Surface((guard_width, guard_height))
+        self.image.fill(color)
+        self.rect = self.image.get_rect(topleft=waypoints[0])
+    
+        self.speed = speed
+        self.current_point = 1
+        self.wait_time = 1000
+        self.waypoints = waypoints
+        self.lastwait = 0
+        self.waiting = False
+    def update(self, current_time):
+        if self.waiting:
+            if current_time - self.lastwait >= self.wait_time:
+                self.waiting = False
+                self.current_point = (self.current_point + 1) % len(self.waypoints)
+            return
+        
+        target = self.waypoints[self.current_point]
+
+        dx = target[0] - self.rect.x
+        dy = target[1] - self.rect.y
+
+        dist = (dx**2 + dy**2) ** .5
+
+        if dist < self.speed:
+            self.rect.topleft = target
+            self.waiting = True
+            self.lastwait = current_time
+
+        else:
+            direction_x = dx / dist
+            direction_y = dy / dist
+            self.rect.x += direction_x * self.speed
+            self.rect.y += direction_y * self.speed
+        
+wall = Wall(x=400, y=250, wall_width=50, wall_height=300, color=white)
+walls = [wall]
+wall_group = pygame.sprite.Group(wall)
+
 exit_door = Exit_Door(x=400, y=height, door_width=100, door_height=10, color=green) 
 door_group = pygame.sprite.Group(exit_door)
+
+guard = Guard(guard_width=50, guard_height=50, color=blue, speed=3, waypoints=[(100, 200), (300, 200), (300, 350), (100, 350)])
+guard_group = pygame.sprite.Group(guard)
 
 diamond = Diamond(x=550,y=150, diamond_width=100, diamond_height=100, color=cyan)   
 diamond_group = pygame.sprite.Group(diamond)     
@@ -66,34 +131,53 @@ player_group = pygame.sprite.Group(player)
 clock = pygame.time.Clock()
 running = True
 
+failed = False
+
 level1_completion = False
 got_diamond = False
 
 while running:
+    current_time = pygame.time.get_ticks()
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
 
     if not level1_completion:
+        
+
         steal = pygame.sprite.spritecollide(player, diamond_group, True)
         exit = pygame.sprite.spritecollide(player, door_group, False)
+        caught = pygame.sprite.spritecollide(player, guard_group, False)
         if steal:
             got_diamond = True
+
+        if caught:
+            failed = True
 
 
         player_group.update()
         diamond_group.update()
         door_group.update()
+        wall_group.update()
+        guard_group.update(current_time)
 
         screen.fill(black)
     
         player_group.draw(screen)
         diamond_group.draw(screen)
         door_group.draw(screen)
+        wall_group.draw(screen)
+        guard_group.draw(screen)
     if got_diamond and exit:
         screen.fill(black)
         font = pygame.font.SysFont(None, 80)
         level1_text = font.render("Level 1 Complete!", True, (green))
+        screen.blit(level1_text, (width // 2 - level1_text.get_width() // 2,
+                                  height // 2 - level1_text.get_height()//2-30))
+    if failed:
+        screen.fill(black)
+        font = pygame.font.SysFont(None, 80)
+        level1_text = font.render("Caught!", True, (red))
         screen.blit(level1_text, (width // 2 - level1_text.get_width() // 2,
                                   height // 2 - level1_text.get_height()//2-30))
 
