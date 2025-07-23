@@ -11,9 +11,10 @@ green = (0, 255, 0)
 white = (255, 255, 255)
 blue = (0, 0, 255)
 
+started = False
+
 screen = pygame.display.set_mode((width, height))
 pygame.display.set_caption("Steal The Diamond")
-
 
 class Player(pygame.sprite.Sprite):
     def __init__(self, x, y, player_width, player_height, color):
@@ -136,13 +137,29 @@ failed = False
 level1_completion = False
 got_diamond = False
 
+
 while running:
     current_time = pygame.time.get_ticks()
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
+    screen.fill(black)
+    font = pygame.font.SysFont(None, 80)
+    title = font.render("Rob The Diamond!", True, (white))
+    screen.blit(title, (width // 2 - title.get_width() // 2,
+                              height // 2 - title.get_height()//2-90))
+    font = pygame.font.SysFont(None, 80)
+    Start = font.render("Start", True, (white))
+    start_button = screen.blit(Start, (width // 2 - Start.get_width() // 2,
+                              height // 2 - Start.get_height()//2-30))
 
-    if not level1_completion:
+    if event.type == pygame.MOUSEBUTTONDOWN:
+        mouse_pos = pygame.mouse.get_pos()
+        if start_button.collidepoint(mouse_pos):
+            started = True
+
+
+    if not level1_completion and started:
         
 
         steal = pygame.sprite.spritecollide(player, diamond_group, True)
