@@ -37,6 +37,15 @@ class Player(pygame.sprite.Sprite):
             self.rect.x -= self.playerspeed
         if keys[pygame.K_d]:
             self.rect.x += self.playerspeed
+        
+        if keys[pygame.K_UP]:
+            self.rect.y -= self.playerspeed
+        if keys[pygame.K_DOWN]:
+            self.rect.y += self.playerspeed
+        if keys[pygame.K_LEFT]:
+            self.rect.x -= self.playerspeed
+        if keys[pygame.K_RIGHT]:
+            self.rect.x += self.playerspeed
 
         if keys[pygame.K_LSHIFT]:
             self.playerspeed = 5
@@ -137,6 +146,7 @@ failed = False
 level1_completion = False
 got_diamond = False
 
+condition = None
 
 while running:
     current_time = pygame.time.get_ticks()
@@ -160,7 +170,17 @@ while running:
 
 
     if not level1_completion and started:
+        screen.fill(black)
+        font = pygame.font.SysFont(None, 50)
+        diamond = font.render("Has Diamond: "+str(condition), True, (white))
+        diamond_condition = screen.blit(diamond, (width // 2 - diamond.get_width() // 2-250,
+                              height // 2 - diamond.get_height()//2-280))
+        if got_diamond == True:
+            condition = "Yes"
+        else:
+            condition = "No"
         
+            
 
         steal = pygame.sprite.spritecollide(player, diamond_group, True)
         exit = pygame.sprite.spritecollide(player, door_group, False)
@@ -178,7 +198,6 @@ while running:
         wall_group.update()
         guard_group.update(current_time)
 
-        screen.fill(black)
     
         player_group.draw(screen)
         diamond_group.draw(screen)
