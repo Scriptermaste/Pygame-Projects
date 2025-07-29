@@ -11,6 +11,10 @@ green = (0, 255, 0)
 white = (255, 255, 255)
 blue = (0, 0, 255)
 
+running = True
+failed = False
+level1_completion = False
+got_diamond = False
 started = False
 
 screen = pygame.display.set_mode((width, height))
@@ -22,46 +26,40 @@ class Player(pygame.sprite.Sprite):
         self.image = pygame.Surface((player_width, player_height))
         self.image.fill(color)
         self.rect = self.image.get_rect(bottomleft=(x, y))
-        self.playerspeed = 2
     def update(self):
         screen_rect = pygame.Rect(0, 0, width, height)
         self.rect.clamp_ip(screen_rect)
-
         keys = pygame.key.get_pressed()
 
-        if keys[pygame.K_w]:
-            self.rect.y -= self.playerspeed
-        if keys[pygame.K_s]:
-            self.rect.y += self.playerspeed
-        if keys[pygame.K_a]:
-            self.rect.x -= self.playerspeed
-        if keys[pygame.K_d]:
-            self.rect.x += self.playerspeed
-        
-        if keys[pygame.K_UP]:
-            self.rect.y -= self.playerspeed
-        if keys[pygame.K_DOWN]:
-            self.rect.y += self.playerspeed
-        if keys[pygame.K_LEFT]:
-            self.rect.x -= self.playerspeed
-        if keys[pygame.K_RIGHT]:
-            self.rect.x += self.playerspeed
+        self.playerspeed = 5 if keys[pygame.K_LSHIFT] else 3
 
-        if keys[pygame.K_LSHIFT]:
-            self.playerspeed = 5
-        if not keys[pygame.K_LSHIFT]:
-            self.playerspeed = 3
-    
+        dx = dy = 0
+        if keys[pygame.K_w] or keys[pygame.K_UP]:
+            dy -= self.playerspeed
+        if keys[pygame.K_s] or keys[pygame.K_DOWN]:
+            dy += self.playerspeed
+        if keys[pygame.K_a] or keys[pygame.K_LEFT]:
+            dx -= self.playerspeed
+        if keys[pygame.K_d] or keys[pygame.K_RIGHT]:
+            dx += self.playerspeed
+
+        self.rect.x += dx
         for wall in walls:
             if self.rect.colliderect(wall.rect):
-                if self.rect.y > 0:
+                if dx > 0:
+                    self.rect.right = wall.rect.left
+
+                elif dx < 0:
+                    self.rect.left = wall.rect.right
+        self.rect.y += dy
+        for wall in walls:
+            if self.rect.colliderect(wall.rect):
+                if dy > 0:
                     self.rect.bottom = wall.rect.top
-            
-                    self.rect.y = 0
-                    self.not_jumping = True
-                elif self.rect.y < 0:
+
+                elif dy < 0:
                     self.rect.top = wall.rect.bottom
-                    self.rect.y = 0
+                   
         
 
 class Diamond(pygame.sprite.Sprite):
@@ -69,7 +67,20 @@ class Diamond(pygame.sprite.Sprite):
         super().__init__()
         self.image = pygame.Surface((diamond_width, diamond_height))
         self.image.fill(color)
-        self.rect = self.image.get_rect(bottomleft=(x, y))  
+        self.rect = self.image.get_rect(bottomleft=(x, y))   
+        print(self.rect.y)  
+    def update(self,caught, steal):
+        if steal:
+            self.image.fill(black)
+
+        if caught:
+            self.respawn()
+            self.image.fill(cyan)
+
+    def respawn(self):
+        self.rect.x = 550
+        self.rect.y = 50
+
 class Wall(pygame.sprite.Sprite):
     def __init__(self, x, y, wall_width, wall_height, color):
         super().__init__()
@@ -98,6 +109,8 @@ class Guard(pygame.sprite.Sprite):
         self.lastwait = 0
         self.waiting = False
     def update(self, current_time):
+        
+
         if self.waiting:
             if current_time - self.lastwait >= self.wait_time:
                 self.waiting = False
@@ -121,7 +134,8 @@ class Guard(pygame.sprite.Sprite):
             direction_y = dy / dist
             self.rect.x += direction_x * self.speed
             self.rect.y += direction_y * self.speed
-        
+   
+    
 wall = Wall(x=400, y=250, wall_width=50, wall_height=300, color=white)
 walls = [wall]
 wall_group = pygame.sprite.Group(wall)
@@ -132,23 +146,22 @@ door_group = pygame.sprite.Group(exit_door)
 guard = Guard(guard_width=50, guard_height=50, color=blue, speed=3, waypoints=[(100, 200), (300, 200), (300, 350), (100, 350)])
 guard_group = pygame.sprite.Group(guard)
 
-diamond = Diamond(x=550,y=150, diamond_width=100, diamond_height=100, color=cyan)   
+diamondx = 550
+diamondy = 150
+
+diamond = Diamond(x=diamondx, y=diamondy, diamond_width=100, diamond_height=100, color=cyan)   
 diamond_group = pygame.sprite.Group(diamond)     
 
 player = Player(x=100, y= 50, player_width=50, player_height=50, color=red)
 player_group = pygame.sprite.Group(player)
 
 clock = pygame.time.Clock()
-running = True
 
-failed = False
-
-level1_completion = False
-got_diamond = False
 
 condition = None
 
 while running:
+    keys = pygame.key.get_pressed()
     current_time = pygame.time.get_ticks()
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -178,29 +191,27 @@ while running:
         if got_diamond == True:
             condition = "Yes"
         else:
-            condition = "No"
-        
-            
+            condition = "No"       
 
-        steal = pygame.sprite.spritecollide(player, diamond_group, True)
+        steal = pygame.sprite.spritecollide(player, diamond_group, False)
         exit = pygame.sprite.spritecollide(player, door_group, False)
         caught = pygame.sprite.spritecollide(player, guard_group, False)
         if steal:
             got_diamond = True
+            diamond_group.remove(diamond)
+            
 
         if caught:
             failed = True
 
-
+        diamond_group.update(caught=bool(caught), steal = bool(steal))
         player_group.update()
-        diamond_group.update()
         door_group.update()
         wall_group.update()
         guard_group.update(current_time)
 
-    
-        player_group.draw(screen)
         diamond_group.draw(screen)
+        player_group.draw(screen)
         door_group.draw(screen)
         wall_group.draw(screen)
         guard_group.draw(screen)
@@ -215,7 +226,20 @@ while running:
         font = pygame.font.SysFont(None, 80)
         level1_text = font.render("Caught!", True, (red))
         screen.blit(level1_text, (width // 2 - level1_text.get_width() // 2,
-                                  height // 2 - level1_text.get_height()//2-30))
+                                  height // 2 - level1_text.get_height()//2-90))
+        
+        restart_text = font.render("Press R To Restart", True, (red))
+        screen.blit(restart_text, (width // 2 - restart_text.get_width() // 2,
+                                  height // 2 - restart_text.get_height()//2-30))
+        if keys[pygame.K_r]:
+            failed = False
+            player.rect.x = 100
+            player.rect.y = 50
+            got_diamond = False
+            level1_completion = False
+            diamond_group.draw(screen)
+            
+            
 
     pygame.display.flip()
     clock.tick(60)
