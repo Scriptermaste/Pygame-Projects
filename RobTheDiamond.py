@@ -1,4 +1,5 @@
 import pygame
+import time
 pygame.init()
 
 width = 800
@@ -16,6 +17,7 @@ failed = False
 level1_completion = False
 got_diamond = False
 started = False
+level2_start = False
 
 screen = pygame.display.set_mode((width, height))
 pygame.display.set_caption("Steal The Diamond")
@@ -220,7 +222,20 @@ while running:
         font = pygame.font.SysFont(None, 80)
         level1_text = font.render("Level 1 Complete!", True, (green))
         screen.blit(level1_text, (width // 2 - level1_text.get_width() // 2,
-                                  height // 2 - level1_text.get_height()//2-30))
+                                   height // 2 - level1_text.get_height()//2-90))
+        level2_starttext = font.render("Next Level", True, (white))
+        level2_button = screen.blit(level2_starttext, (width // 2 - level2_starttext.get_width() // 2,
+                                    height // 2 - level2_starttext.get_height()//2-30))
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            if level2_button.collidepoint(mouse_pos):
+                level2_start = True
+    if level2_start:
+        screen.fill(black)
+        player_group.draw(screen)
+        diamond_group.draw(screen)
+        guard_group.draw(screen)
+        door_group.draw(screen)
+
     if failed:
         screen.fill(black)
         font = pygame.font.SysFont(None, 80)
@@ -238,9 +253,7 @@ while running:
             got_diamond = False
             level1_completion = False
             diamond_group.draw(screen)
-            
-            
-
+        
     pygame.display.flip()
     clock.tick(60)
 pygame.quit()
