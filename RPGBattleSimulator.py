@@ -5,8 +5,9 @@ width = 800
 height = 600
 
 red = (255, 0, 0)
-blue = (0, 0, 255)
+cyan = (0, 255, 255)
 green = (0, 255, 0)
+blue = (0, 0, 255)
 
 screen = pygame.display.set_mode((width, height))
 pygame.display.set_caption("Battle Simulator")
@@ -32,8 +33,22 @@ class Enemy(pygame.sprite.Sprite):
         self.image.fill(color)
         self.rect = self.image.get_rect(bottomleft=(x, y))
 
-player = Player(x=100, y=400, color=blue, player_width=50, player_height=50)
+class ManaBar(pygame.sprite.Sprite):
+    def __init__(self, x, y, color, mana_width, mana_height):
+        super().__init__()
+        self.image = pygame.Surface((mana_width, mana_height))
+        self.image.fill(color)
+        self.rect = self.image.get_rect(bottomleft=(x, y))
+
+
+player = Player(x=100, y=400, color=cyan, player_width=50, player_height=50)
 player_group = pygame.sprite.Group(player)
+
+healthbar = HealthBar(x= 250, y=400, color=green, healthbar_width=100, healthbar_height=20)
+healthbar_group = pygame.sprite.Group(healthbar)
+
+manabar = ManaBar(x=400, y=400, color=blue, mana_width=100, mana_height=20)
+manabar_group = pygame.sprite.Group(manabar)
 
 enemy = Enemy(x=100, y=100, color=red, enemy_width=50, enemy_height=50)
 enemy_group = pygame.sprite.Group(enemy)
@@ -41,15 +56,18 @@ enemy_group = pygame.sprite.Group(enemy)
 running = True
 clock = pygame.time.Clock()
 
+all_groups = [player_group, healthbar_group, manabar_group, enemy_group]
+
 while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
-    player_group.update()
-    enemy_group.update()
+    for group in all_groups:
+        group.update()
 
-    player_group.draw(screen)
-    enemy_group.draw(screen)
+
+    for group in all_groups:
+        group.draw(screen)
     pygame.display.flip()
     clock.tick(60)
 pygame.quit()
