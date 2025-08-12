@@ -8,6 +8,10 @@ red = (255, 0, 0)
 cyan = (0, 255, 255)
 green = (0, 255, 0)
 blue = (0, 0, 255)
+black = (0, 0, 0)
+white = (255, 255, 255)
+
+enemy_defeated = False
 
 screen = pygame.display.set_mode((width, height))
 pygame.display.set_caption("Battle Simulator")
@@ -62,12 +66,19 @@ while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
-    for group in all_groups:
-        group.update()
+    if not enemy_defeated:
+        screen.fill(black)
+        font = pygame.font.SysFont(None, 60)
+        info_text = font.render("Player", True, (white))
+        screen.blit(info_text, (width // 2 - info_text.get_width() // 2-280,
+                                   height // 2 - info_text.get_height()//2+150))
+
+        for group in all_groups:
+            group.update()
 
 
-    for group in all_groups:
-        group.draw(screen)
+        for group in all_groups:
+            group.draw(screen)
     pygame.display.flip()
     clock.tick(60)
 pygame.quit()
