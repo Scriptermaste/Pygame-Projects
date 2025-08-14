@@ -73,12 +73,20 @@ while running:
         screen.blit(info_text, (width // 2 - info_text.get_width() // 2-280,
                                    height // 2 - info_text.get_height()//2+150))
 
+
         for group in all_groups:
             group.update()
 
 
         for group in all_groups:
             group.draw(screen)
+    else:
+        screen.fill(black)
+        font = pygame.font.SysFont(None, 80)
+        victory_text = font.render("You Won!", True, (white))
+        screen.blit(victory_text, (width // 2 - victory_text.get_width() // 2,
+                                   height // 2 - victory_text.get_height()//2-90))
+
     pygame.display.flip()
     clock.tick(60)
 pygame.quit()
