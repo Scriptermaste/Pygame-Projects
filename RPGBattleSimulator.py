@@ -73,6 +73,10 @@ while running:
         screen.blit(info_text, (width // 2 - info_text.get_width() // 2-280,
                                    height // 2 - info_text.get_height()//2+150))
 
+        font = pygame.font.SysFont(None, 50)
+        attack_text = font.render("> Attack", True, (white))
+        attack_button = screen.blit(attack_text, (width // 2 - attack_text.get_width() // 2-280,
+                                   height // 2 - attack_text.get_height()//2+200))
 
         for group in all_groups:
             group.update()
