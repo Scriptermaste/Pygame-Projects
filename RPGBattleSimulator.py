@@ -79,9 +79,13 @@ while running:
                                    height // 2 - attack_text.get_height()//2+200))
         font = pygame.font.SysFont(None, 50)
         defend_text = font.render("> Defend", True, (white))
-        attack_button = screen.blit(defend_text, (width // 2 - defend_text.get_width() // 2-280,
+        defend_button = screen.blit(defend_text, (width // 2 - defend_text.get_width() // 2-280,
                                    height // 2 - defend_text.get_height()//2+250))
 
+        font = pygame.font.SysFont(None, 50)
+        inventory_text = font.render("> Inventory", True, (white))
+        inventory_button = screen.blit(inventory_text, (width // 2 - inventory_text.get_width() // 2-100,
+                                   height // 2 - inventory_text.get_height()//2+250))
         for group in all_groups:
             group.update()
 
