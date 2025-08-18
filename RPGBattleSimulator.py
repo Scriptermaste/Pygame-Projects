@@ -86,6 +86,11 @@ while running:
         inventory_text = font.render("> Inventory", True, (white))
         inventory_button = screen.blit(inventory_text, (width // 2 - inventory_text.get_width() // 2-100,
                                    height // 2 - inventory_text.get_height()//2+250))
+        
+        font = pygame.font.SysFont(None, 50)
+        surrender_text = font.render("> Surrender", True, (white))
+        surrender_button = screen.blit(surrender_text, (width // 2 - surrender_text.get_width() // 2-100,
+                                   height // 2 - surrender_text.get_height()//2+200))
         for group in all_groups:
             group.update()
 
