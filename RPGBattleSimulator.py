@@ -36,6 +36,12 @@ class Enemy(pygame.sprite.Sprite):
         self.image = pygame.Surface((enemy_width, enemy_height))
         self.image.fill(color)
         self.rect = self.image.get_rect(bottomleft=(x, y))
+class enemy_health(pygame.sprite.Sprite):
+    def __init__(self, x, y, color, healthbar_width, healthbar_height):
+        super().__init__()
+        self.image = pygame.Surface((healthbar_width, healthbar_height))
+        self.image.fill(color)
+        self.rect = self.image.get_rect(bottomleft=(x, y))
 
 class ManaBar(pygame.sprite.Sprite):
     def __init__(self, x, y, color, mana_width, mana_height):
