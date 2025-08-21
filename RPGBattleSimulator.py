@@ -4,6 +4,8 @@ pygame.init()
 width = 800
 height = 600
 
+
+
 red = (255, 0, 0)
 cyan = (0, 255, 255)
 green = (0, 255, 0)
@@ -12,6 +14,7 @@ black = (0, 0, 0)
 white = (255, 255, 255)
 
 enemy_defeated = False
+surrendered = False
 
 screen = pygame.display.set_mode((width, height))
 pygame.display.set_caption("Battle Simulator")
@@ -97,12 +100,28 @@ while running:
         surrender_text = font.render("> Surrender", True, (white))
         surrender_button = screen.blit(surrender_text, (width // 2 - surrender_text.get_width() // 2-100,
                                    height // 2 - surrender_text.get_height()//2+200))
+        
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            mouse_pos = pygame.mouse.get_pos()
+            if surrender_button.collidepoint(mouse_pos):
+                surrendered = True
+
+        
+        
         for group in all_groups:
             group.update()
 
 
         for group in all_groups:
             group.draw(screen)
+
+        if surrendered:
+            screen.fill(black)
+            font = pygame.font.SysFont(None, 80)
+            surrendered_text = font.render("You Lost!", True, (red))
+            screen.blit(surrendered_text, (width // 2 - surrendered_text.get_width() // 2,
+                                   height // 2 - surrendered_text.get_height()//2-90))
+
     else:
         screen.fill(black)
         font = pygame.font.SysFont(None, 80)
