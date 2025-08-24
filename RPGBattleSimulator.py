@@ -15,6 +15,7 @@ white = (255, 255, 255)
 
 enemy_defeated = False
 surrendered = False
+defeated = False
 
 screen = pygame.display.set_mode((width, height))
 pygame.display.set_caption("Battle Simulator")
@@ -45,6 +46,9 @@ class enemy_health(pygame.sprite.Sprite):
         self.image = pygame.Surface((healthbar_width, healthbar_height))
         self.image.fill(color)
         self.rect = self.image.get_rect(bottomleft=(x, y))
+        self.enemy_defeated = enemy_defeated
+        if healthbar_width == 0:
+            self.enemy_defeated = True
 
 class ManaBar(pygame.sprite.Sprite):
     def __init__(self, x, y, color, mana_width, mana_height):
@@ -115,7 +119,7 @@ while running:
         for group in all_groups:
             group.draw(screen)
 
-        if surrendered:
+        if surrendered or defeated:
             screen.fill(black)
             font = pygame.font.SysFont(None, 80)
             surrendered_text = font.render("You Lost!", True, (red))
