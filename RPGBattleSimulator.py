@@ -16,6 +16,7 @@ white = (255, 255, 255)
 enemy_defeated = False
 surrendered = False
 defeated = False
+defending = False
 
 screen = pygame.display.set_mode((width, height))
 pygame.display.set_caption("Battle Simulator")
@@ -104,6 +105,8 @@ while running:
         surrender_text = font.render("> Surrender", True, (white))
         surrender_button = screen.blit(surrender_text, (width // 2 - surrender_text.get_width() // 2-100,
                                    height // 2 - surrender_text.get_height()//2+200))
+        if defending:
+            print("Player is in defense mode!")
         
         if event.type == pygame.MOUSEBUTTONDOWN:
             mouse_pos = pygame.mouse.get_pos()
