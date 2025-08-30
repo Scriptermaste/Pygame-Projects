@@ -17,6 +17,7 @@ enemy_defeated = False
 surrendered = False
 defeated = False
 defending = False
+enemy_turn = False
 
 screen = pygame.display.set_mode((width, height))
 pygame.display.set_caption("Battle Simulator")
@@ -106,7 +107,17 @@ while running:
         surrender_button = screen.blit(surrender_text, (width // 2 - surrender_text.get_width() // 2-100,
                                    height // 2 - surrender_text.get_height()//2+200))
         if defending:
-            print("Player is in defense mode!")
+            print("Player is defending")
+            enemy_turn = True
+
+            font = pygame.font.SysFont(None, 50)
+            defending_text = font.render(" Player is defending", True, (white))
+            screen.blit(defending_text, (width // 2 - defending_text.get_width() // 2-100,
+                                   height // 2 - defending_text.get_height()//2+200))
+            enemy_turn = True
+        
+        if enemy_turn:
+            print("It is the enemy's turn now")
         
         if event.type == pygame.MOUSEBUTTONDOWN:
             mouse_pos = pygame.mouse.get_pos()
